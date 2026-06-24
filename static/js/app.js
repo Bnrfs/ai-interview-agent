@@ -756,8 +756,14 @@ async function confirmAutoGenerate() {
     });
 
     if (!resp.ok) {
-      const err = await resp.json();
-      alert('生成失败：' + (err.detail || '未知错误'));
+      let errMsg = '未知错误';
+      try {
+        const err = await resp.json();
+        errMsg = err.detail || errMsg;
+      } catch (_) {
+        errMsg = await resp.text().catch(() => '服务器错误');
+      }
+      alert('生成失败：' + errMsg);
       confirmBtn.disabled = false;
       confirmBtn.textContent = '确认';
       return;
@@ -815,8 +821,14 @@ async function askAssistant() {
       body: JSON.stringify({ position, background, level, focus_areas: focusAreas }),
     });
     if (!resp.ok) {
-      const err = await resp.json();
-      alert('生成失败：' + (err.detail || '未知错误'));
+      let errMsg = '未知错误';
+      try {
+        const err = await resp.json();
+        errMsg = err.detail || errMsg;
+      } catch (_) {
+        errMsg = await resp.text().catch(() => '服务器错误');
+      }
+      alert('生成失败：' + errMsg);
       btn.disabled = false;
       btn.innerHTML = '🤖 生成准备指南';
       return;

@@ -776,13 +776,16 @@ async def prepare_guide(req: PrepareGuideRequest):
     """生成面试准备指南"""
     if not req.position.strip():
         raise HTTPException(400, "请填写目标岗位")
-    guide = get_assistant().generate_guide(
-        position=req.position.strip(),
-        background=req.background.strip(),
-        level=req.level.strip(),
-        focus_areas=req.focus_areas,
-    )
-    return {"guide": guide}
+    try:
+        guide = get_assistant().generate_guide(
+            position=req.position.strip(),
+            background=req.background.strip(),
+            level=req.level.strip(),
+            focus_areas=req.focus_areas,
+        )
+        return {"guide": guide}
+    except Exception as e:
+        raise HTTPException(500, f"生成失败: {str(e)}")
 
 
 # ==================== 前端页面 ====================

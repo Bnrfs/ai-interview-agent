@@ -28,13 +28,16 @@ class TaoTokenProvider(LLMProvider):
 
     def chat(self, messages, temperature=0.7, max_tokens=2048):
         self._ensure_client()
-        resp = self._client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
-        return resp.choices[0].message.content
+        try:
+            resp = self._client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            return resp.choices[0].message.content
+        except Exception as e:
+            raise RuntimeError(f"TaoToken API 调用失败: {str(e)}")
 
     def chat_json(self, messages, temperature=0.3, max_tokens=1024):
         messages.append({"role": "system", "content": "请严格以 JSON 格式输出，不要包含任何其他文本。"})
@@ -54,13 +57,16 @@ class OpenAIProvider(LLMProvider):
 
     def chat(self, messages, temperature=0.7, max_tokens=2048):
         self._ensure_client()
-        resp = self._client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
-        return resp.choices[0].message.content
+        try:
+            resp = self._client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            return resp.choices[0].message.content
+        except Exception as e:
+            raise RuntimeError(f"OpenAI API 调用失败: {str(e)}")
 
     def chat_json(self, messages, temperature=0.3, max_tokens=1024):
         messages.append({"role": "system", "content": "请严格以 JSON 格式输出，不要包含任何其他文本。"})
@@ -82,13 +88,16 @@ class DeepSeekProvider(LLMProvider):
 
     def chat(self, messages, temperature=0.7, max_tokens=2048):
         self._ensure_client()
-        resp = self._client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
-        return resp.choices[0].message.content
+        try:
+            resp = self._client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            return resp.choices[0].message.content
+        except Exception as e:
+            raise RuntimeError(f"DeepSeek API 调用失败: {str(e)}")
 
     def chat_json(self, messages, temperature=0.3, max_tokens=1024):
         messages.append({"role": "system", "content": "请严格以 JSON 格式输出，不要包含任何其他文本。"})
