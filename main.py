@@ -790,6 +790,16 @@ async def prepare_guide(req: PrepareGuideRequest):
         raise HTTPException(500, f"生成失败: {str(e)}")
 
 
+@app.post("/api/assistant/usage-guide")
+async def usage_guide():
+    """生成智能体使用说明"""
+    try:
+        guide = get_assistant().generate_usage_guide()
+        return {"guide": guide}
+    except Exception as e:
+        raise HTTPException(500, f"生成失败: {str(e)}")
+
+
 # ==================== 前端页面 ====================
 
 @app.get("/", response_class=HTMLResponse)

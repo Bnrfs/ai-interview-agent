@@ -107,6 +107,30 @@
     <!-- ====== 右栏：助手 + 场景管理 + 历史 ====== -->
     <div style="display:flex;flex-direction:column;gap:20px;">
 
+      <!-- 使用说明 -->
+      <div class="card" id="usageGuideCard">
+        <div class="card-header">
+          <div class="icon blue">📖</div>
+          <h2>使用说明</h2>
+          <button onclick="toggleUsageGuidePanel()" class="btn btn-ghost btn-icon" id="toggleUsageGuideBtn" title="展开">＋</button>
+        </div>
+        <div class="card-body" id="usageGuidePanel" style="display:none;">
+          <p style="color:var(--text-dim);font-size:13px;margin:0 0 12px 0;">第一次使用？点击下方按钮，AI 将为你生成一份完整的使用指南。</p>
+          <button onclick="generateUsageGuide()" class="btn btn-primary btn-block" id="usageGuideBtn">
+            📖 生成使用说明
+          </button>
+          <div class="divider" id="usageGuideDivider" style="display:none;"></div>
+          <div id="usageGuideResult" style="display:none;">
+            <div class="section-title">📖 使用说明</div>
+            <div id="usageGuideContent" class="report-content" style="font-size:14px;"></div>
+            <div class="btn-row" style="display:flex;gap:8px;margin-top:12px;">
+              <button onclick="copyUsageGuide()" class="btn btn-secondary" style="flex:1">📋 复制</button>
+              <button onclick="closeUsageGuideResult()" class="btn btn-ghost" style="flex:1">收起</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 面试准备助手 -->
       <div class="card" id="assistantCard">
         <div class="card-header">

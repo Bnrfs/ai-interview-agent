@@ -913,3 +913,61 @@ function markdownToHtml(md) {
   html = html.replace(/\n/g, '<br>');
   return html;
 }
+
+// ==================== 使用说明 ====================
+
+function toggleUsageGuidePanel() {
+  const panel = document.getElementById('usageGuidePanel');
+  const btn = document.getElementById('toggleUsageGuideBtn');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    btn.textContent = '−';
+  } else {
+    panel.style.display = 'none';
+    btn.textContent = '＋';
+  }
+}
+
+async function generateUsageGuide() {
+  const btn = document.getElementById('usageGuideBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 生成中...';
+
+  try {
+    const resp = await fetch('/api/assistant/usage-guide', { method: 'POST' });
+    if (!resp.ok) {
+      let errMsg = '未知错误';
+      try { const err = await resp.json(); errMsg = err.detail || errMsg; } catch (_) {}
+      alert('生成失败：' + errMsg);
+      btn.disabled = false;
+      btn.innerHTML = '📖 生成使用说明';
+      return;
+    }
+    const data = await resp.json();
+    const html = markdownToHtml(data.guide);
+    document.getElementById('usageGuideContent').innerHTML = html;
+    document.getElementById('usageGuideResult').style.display = 'block';
+    document.getElementById('usageGuideDivider').style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = '🔄 重新生成';
+  } catch (e) {
+    alert('网络错误：' + e.message);
+    btn.disabled = false;
+    btn.innerHTML = '📖 生成使用说明';
+  }
+}
+
+function closeUsageGuideResult() {
+  document.getElementById('usageGuideResult').style.display = 'none';
+  document.getElementById('usageGuideDivider').style.display = 'none';
+  document.getElementById('usageGuideBtn').innerHTML = '📖 生成使用说明';
+}
+
+function copyUsageGuide() {
+  const content = document.getElementById('usageGuideContent').innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    alert('已复制到剪贴板');
+  }).catch(() => {
+    alert('复制失败，请手动选择复制');
+  });
+}
