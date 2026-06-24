@@ -769,6 +769,7 @@ class PrepareGuideRequest(BaseModel):
     background: str = ""
     level: str = ""
     focus_areas: list[str] = []
+    session_id: str = ""  # 可选：基于哪次历史面试生成
 
 
 @app.post("/api/assistant/prepare-guide")
@@ -782,6 +783,7 @@ async def prepare_guide(req: PrepareGuideRequest):
             background=req.background.strip(),
             level=req.level.strip(),
             focus_areas=req.focus_areas,
+            session_id=req.session_id,
         )
         return {"guide": guide}
     except Exception as e:

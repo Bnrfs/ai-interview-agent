@@ -814,11 +814,21 @@ async function askAssistant() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> 生成中...';
 
+  // 自动获取最近一次面试的 session_id
+  let latestSessionId = '';
+  try {
+    const recordsResp = await fetch('/api/records');
+    const recordsData = await recordsResp.json();
+    if (recordsData.records && recordsData.records.length > 0) {
+      latestSessionId = recordsData.records[0].session_id;
+    }
+  } catch (_) { /* 无历史记录，不传 session_id */ }
+
   try {
     const resp = await fetch('/api/assistant/prepare-guide', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ position, background, level, focus_areas: focusAreas }),
+      body: JSON.stringify({ position, background, level, focus_areas: focusAreas, session_id: latestSessionId }),
     });
     if (!resp.ok) {
       let errMsg = '未知错误';
