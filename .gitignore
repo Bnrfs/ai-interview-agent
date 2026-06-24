@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 本地数据（Railway 不需要）
+checkpoints/
+records/
+*.log
+server.log
+tunnel.log
+
+# 虚拟环境
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 启动脚本（本地用）
+start.sh
+start.bat
+restart.sh
+
+# 音频缓存
+audio/
+chroma_db/

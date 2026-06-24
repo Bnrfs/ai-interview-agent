@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>面试中 · AI模拟面试</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="container interview-container">
+  <div class="interview-header">
+    <div class="scene-badge">
+      <span id="sceneLabel">面试中</span>
+    </div>
+    <div class="status">
+      <span id="progressLabel" class="progress-text">第 0/0 题</span>
+      <span id="timerLabel" class="timer">⏱ --:--</span>
+    </div>
+  </div>
+
+  <div class="chat-area" id="chatArea">
+    <div class="loading-msg">正在初始化面试...</div>
+  </div>
+
+  <div class="input-area">
+    <textarea id="answerInput" placeholder="输入你的回答，或点击🎤语音输入..." rows="3" disabled></textarea>
+    <div class="button-row">
+      <button id="voiceBtn" class="btn btn-secondary" disabled>🎤 语音</button>
+      <button id="pauseBtn" class="btn btn-warning">⏸ 暂停</button>
+      <button id="submitBtn" class="btn btn-primary" disabled>发送回答</button>
+    </div>
+  </div>
+</div>
+
+<div id="pauseOverlay" class="overlay" style="display:none">
+  <div class="overlay-card">
+    <h2>⏸ 面试已暂停</h2>
+    <p>进度已保存，可以稍后继续。</p>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button onclick="resumeFromPause()" class="btn btn-primary">继续面试</button>
+      <button onclick="location.href='/'" class="btn btn-secondary">返回首页</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const SESSION_ID = params.get('session_id') || '';
+</script>
+<script src="/static/js/app.js?v=4"></script>
+</body>
+</html>

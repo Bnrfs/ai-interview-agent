@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI模拟面试</title>
+<link rel="stylesheet" href="/static/css/style.css?v=5">
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-icon">🎯</div>
+    <h1>AI 模拟面试</h1>
+    <p>多智能体协作 · 真实面试陪练 · 深度评估报告</p>
+  </div>
+
+  <!-- Main Grid: Config + Sidebar -->
+  <div class="main-grid">
+
+    <!-- ====== 左栏：面试配置 ====== -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon purple">⚡</div>
+        <h2>开始一场面试</h2>
+        <span class="badge" id="totalQuestionBadge">45 题</span>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">面试场景</label>
+          <select id="sceneSelect">
+            <option value="">加载中...</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">题目数量</label>
+            <select id="questionCount">
+              <option value="3">3 题 · 热身</option>
+              <option value="5" selected>5 题 · 标准</option>
+              <option value="8">8 题 · 强化</option>
+              <option value="10">10 题 · 全真</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">每题限时</label>
+            <select id="timeLimit">
+              <option value="120">2 分钟</option>
+              <option value="180" selected>3 分钟</option>
+              <option value="300">5 分钟</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" id="categoryGroup">
+          <label class="form-label">子类别筛选 <span style="color:var(--text-muted);text-transform:none;font-weight:400;">（可选）</span></label>
+          <select id="categorySelect">
+            <option value="">全部类别</option>
+          </select>
+        </div>
+
+        <!-- 压力模式 Toggle -->
+        <div class="toggle-row" id="pressureToggle" onclick="togglePressure()">
+          <div class="toggle-info">
+            <div class="title">⚡ 压力模式</div>
+            <div class="desc">紧逼追问 · 快速节奏 · 模拟高压面试</div>
+          </div>
+          <div class="toggle-switch" id="pressureSwitch"></div>
+        </div>
+        <div class="toggle-extra" id="pressureExtra" style="display:none;">
+          <span style="font-size:12px;color:var(--text-dim)">强度：</span>
+          <select id="pressureLevel">
+            <option value="1">轻度</option>
+            <option value="2" selected>中度</option>
+            <option value="3">重度</option>
+          </select>
+        </div>
+
+        <!-- Banners -->
+        <div class="banner info" id="checkpointBanner" style="display:none;">
+          <span>📌</span>
+          <span class="banner-text" id="checkpointText">检测到未完成的面试</span>
+          <span class="banner-actions">
+            <button onclick="resumeInterview()" class="btn btn-primary btn-sm">继续</button>
+            <button onclick="dismissCheckpoint()" class="btn btn-ghost">忽略</button>
+          </span>
+        </div>
+
+        <div class="banner warning" id="retryBanner" style="display:none;">
+          <span>🔄</span>
+          <span class="banner-text">检测到错题，是否重练？</span>
+          <span class="banner-actions">
+            <button onclick="startRetry()" class="btn btn-warning btn-sm">重练</button>
+            <button onclick="dismissRetry()" class="btn btn-ghost">忽略</button>
+          </span>
+        </div>
+
+        <button onclick="startInterview()" class="btn btn-primary btn-block btn-lg" id="startBtn">
+          开始面试
+        </button>
+      </div>
+    </div>
+
+    <!-- ====== 右栏：助手 + 场景管理 + 历史 ====== -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+
+      <!-- 面试准备助手 -->
+      <div class="card" id="assistantCard">
+        <div class="card-header">
+          <div class="icon purple">💡</div>
+          <h2>面试准备助手</h2>
+          <button onclick="toggleAssistantPanel()" class="btn btn-ghost btn-icon" id="toggleAssistantBtn" title="展开">＋</button>
+        </div>
+        <div class="card-body" id="assistantPanel" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">目标岗位 <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="assistantPosition" placeholder="如：高级产品经理、Java后端开发">
+          </div>
+          <div class="form-group">
+            <label class="form-label">级别 <span style="color:var(--text-muted);text-transform:none;font-weight:400;">（可选）</span></label>
+            <select id="assistantLevel">
+              <option value="">不限</option>
+              <option value="应届生">应届生/校招</option>
+              <option value="初级">初级（1-3年）</option>
+              <option value="中级">中级（3-5年）</option>
+              <option value="高级">高级（5-8年）</option>
+              <option value="专家">专家/总监（8年+）</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">个人背景 <span style="color:var(--text-muted);text-transform:none;font-weight:400;">（可选，越详细越个性化）</span></label>
+            <textarea id="assistantBackground" rows="2" placeholder="如：3年B端产品经验，做过CRM和ERP，最近在看AI方向的机会..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">重点关注 <span style="color:var(--text-muted);text-transform:none;font-weight:400;">（逗号分隔，可选）</span></label>
+            <input type="text" id="assistantFocus" placeholder="如：系统设计,项目难点,沟通能力">
+          </div>
+          <button onclick="askAssistant()" class="btn btn-primary btn-block" id="assistantBtn">
+            🤖 生成准备指南
+          </button>
+          <div class="divider"></div>
+          <div id="assistantResult" style="display:none;">
+            <div class="section-title">📋 准备指南</div>
+            <div id="assistantContent" class="report-content" style="font-size:13px; max-height:500px; overflow-y:auto;"></div>
+            <div class="btn-row" style="display:flex;gap:8px;margin-top:12px;">
+              <button onclick="copyAssistantGuide()" class="btn btn-secondary" style="flex:1">📋 复制</button>
+              <button onclick="closeAssistantResult()" class="btn btn-ghost" style="flex:1">收起</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自定义场景 -->
+      <div class="card" id="customSceneCard">
+        <div class="card-header">
+          <div class="icon green">🛠</div>
+          <h2>自定义场景</h2>
+          <button onclick="toggleCustomPanel()" class="btn btn-ghost btn-icon" id="toggleCustomBtn" title="展开">＋</button>
+        </div>
+        <div class="card-body" id="customPanel" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">场景名称</label>
+            <input type="text" id="newSceneName" placeholder="如：产品经理、UI设计师">
+          </div>
+          <div class="form-group">
+            <label class="form-label">子类别 <span style="color:var(--text-muted);text-transform:none;font-weight:400;">（逗号分隔）</span></label>
+            <input type="text" id="newSceneCategories" placeholder="如：需求分析,用户研究,竞品分析">
+          </div>
+          <button onclick="createCustomScene()" class="btn btn-primary btn-block">创建场景</button>
+          <div class="divider"></div>
+          <div id="customSceneList"></div>
+        </div>
+      </div>
+
+      <!-- 题目管理面板（动态显示） -->
+      <div class="card" id="questionManageCard" style="display:none;">
+        <div class="card-header">
+          <div class="icon amber">📝</div>
+          <h2 id="questionManageTitle">题目管理</h2>
+          <button onclick="closeQuestionPanel()" class="btn btn-ghost btn-icon" title="关闭">✕</button>
+        </div>
+        <div class="card-body" id="questionPanel">
+          <div class="form-group">
+            <label class="form-label">题目内容</label>
+            <textarea id="newQuestionText" rows="3" placeholder="输入面试题目"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">类别</label>
+              <input type="text" id="newQuestionCategory" placeholder="如：需求分析">
+            </div>
+            <div class="form-group">
+              <label class="form-label">难度 1-5</label>
+              <input type="number" id="newQuestionDifficulty" value="3" min="1" max="5">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">追问关键词 <span style="color:var(--text-muted);text-transform:none;font-weight:400;">（逗号分隔）</span></label>
+            <input type="text" id="newQuestionKeywords" placeholder="如：产品思维,数据分析">
+          </div>
+          <div class="form-group">
+            <label class="form-label">模范回答要点</label>
+            <textarea id="newQuestionModelAnswer" rows="2" placeholder="供评分参考的关键得分点"></textarea>
+          </div>
+          <div class="btn-row" style="display:flex;gap:8px;">
+            <button onclick="addCustomQuestion()" class="btn btn-primary" style="flex:1">手动添加</button>
+            <button onclick="autoGenerateQuestions()" class="btn btn-success" style="flex:1" id="autoGenBtn">🤖 自动生成</button>
+          </div>
+          <div class="gen-options" id="autoGenOptions" style="display:none;">
+            <span class="label">数量：</span>
+            <select id="autoGenCount">
+              <option value="3">3 题</option>
+              <option value="5" selected>5 题</option>
+              <option value="8">8 题</option>
+              <option value="10">10 题</option>
+            </select>
+            <button onclick="confirmAutoGenerate()" class="btn btn-success btn-sm">确认</button>
+            <button onclick="cancelAutoGenerate()" class="btn btn-ghost btn-sm">取消</button>
+          </div>
+          <div class="divider"></div>
+          <div id="customQuestionList"></div>
+        </div>
+      </div>
+
+      <!-- 历史记录 -->
+      <div class="card" id="historyCard" style="display:none;">
+        <div class="card-header">
+          <div class="icon purple">📋</div>
+          <h2>最近记录</h2>
+          <button onclick="clearRecords()" class="btn btn-ghost btn-sm" style="margin-left:auto;" title="清空所有记录">🗑 清空</button>
+        </div>
+        <div class="card-body" id="historyList"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

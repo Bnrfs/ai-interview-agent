@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>面试报告 · AI模拟面试</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+<div class="container report-container">
+
+  <div class="report-hero">
+    <h1>📊 面试报告</h1>
+    <p style="color:var(--text-dim);margin-top:4px;" id="reportMeta"></p>
+  </div>
+
+  <div class="score-display">
+    <div class="score-circle">
+      <span class="score-number" id="totalScore">--</span>
+      <span class="score-label">总分</span>
+    </div>
+  </div>
+
+  <div class="radar-chart" id="radarChart"></div>
+
+  <div class="report-content" id="reportContent">加载中...</div>
+
+  <div class="question-details">
+    <h2>📝 逐题回顾</h2>
+    <div id="detailsList"></div>
+  </div>
+
+  <div class="report-actions">
+    <button onclick="location.href='/'" class="btn btn-primary">再来一次</button>
+    <button onclick="retryWrong()" class="btn btn-warning" id="retryBtn" style="display:none">🔄 重练错题</button>
+    <button onclick="location.href='/'" class="btn btn-secondary">返回首页</button>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const SESSION_ID = params.get('session_id') || '';
+
+async function loadReport() {
+  if (!SESSION_ID) {
+    document.getElementById('reportContent').innerHTML = '<p>未找到面试记录。</p>';
+    return;
+  }
+
+  try {
+    const resp = await fetch(`/api/record/${SESSION_ID}`);
+    if (!resp.ok) throw new Error('加载失败');
+    const data = await resp.json();
+
+    document.getElementById('totalScore').textContent = data.total_score || '--';
+    document.getElementById('reportMeta').textContent =
+      `场景：${data.scene || ''}  ·  ${data.question_count || 0} 题`;
+
+    if (data.report) {
+      document.getElementById('reportContent').innerHTML = data.report.replace(/\n/g, '<br>');
+    }
+
+    const dims = {logic: 0, completeness: 0, organization: 0, match: 0};
+    let count = 0;
+    (data.answered_questions || []).forEach(aq => {
+      if (aq.scores) {
+        for (let k in dims) dims[k] += (aq.scores[k] || 0);
+        count++;
+      }
+    });
+    if (count > 0) {
+      for (let k in dims) dims[k] = parseFloat((dims[k] / count).toFixed(1));
+    }
+
+    const chart = echarts.init(document.getElementById('radarChart'));
+    chart.setOption({
+      radar: {
+        indicator: [
+          { name: '逻辑清晰度', max: 10 },
+          { name: '内容完整性', max: 10 },
+          { name: '语言组织力', max: 10 },
+          { name: '岗位匹配度', max: 10 },
+        ],
+        center: ['50%', '55%'],
+        radius: '75%',
+        axisName: { color: '#8892a8' },
+        splitArea: { areaStyle: { color: ['rgba(99,102,241,0.02)', 'rgba(99,102,241,0.02)'] } },
+        splitLine: { lineStyle: { color: '#252540' } },
+        axisLine: { lineStyle: { color: '#252540' } },
+      },
+      series: [{
+        type: 'radar',
+        data: [{ value: [dims.logic, dims.completeness, dims.organization, dims.match], name: '本次得分' }],
+        areaStyle: { color: 'rgba(99, 102, 241, 0.2)' },
+        lineStyle: { color: '#818cf8', width: 2 },
+        itemStyle: { color: '#818cf8' },
+      }],
+    });
+
+    window.addEventListener('resize', () => chart.resize());
+
+    renderDetails(data);
+  } catch (e) {
+    document.getElementById('reportContent').innerHTML = '<p>加载报告失败：' + e.message + '</p>';
+  }
+}
+
+function retryWrong() {
+  if (!SESSION_ID) return;
+  location.href = `/?retry=${SESSION_ID}`;
+}
+
+function renderDetails(data) {
+  const list = document.getElementById('detailsList');
+  const answered = data.answered_questions || [];
+  if (answered.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">📝</div>暂无答题记录</div>';
+    return;
+  }
+
+  list.innerHTML = answered.map((aq, i) => {
+    const scores = aq.scores || {};
+    const numericVals = Object.values(scores).filter(v => typeof v === 'number');
+    const avg = numericVals.length ? (numericVals.reduce((a,b)=>a+b,0)/numericVals.length).toFixed(1) : '--';
+    const isWrong = parseFloat(avg) < 6.0;
+    const dimLabels = {logic:'逻辑', completeness:'内容', organization:'组织', match:'匹配'};
+    const dims = Object.entries(dimLabels)
+      .map(([k, label]) => `${label}:${scores[k] ?? '--'}`)
+      .join(' · ');
+
+    return `<div class="detail-card ${isWrong ? 'wrong' : ''}">
+      <div class="detail-header">
+        <span class="detail-index">#${i+1}</span>
+        <span class="detail-question">${escHtml(aq.question_text || '未知题目')}</span>
+        <span class="detail-score ${isWrong ? 'low' : ''}">${avg}分</span>
+      </div>
+      <div class="detail-body">
+        <div class="detail-answer"><strong>你的回答：</strong>${escHtml((aq.user_answer || '未作答').slice(0, 300))}</div>
+        <div class="detail-dims">${dims}</div>
+        <div class="detail-comment">💬 ${escHtml(aq.comment || '无评语')}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const wrongIds = data.wrong_question_ids || [];
+  if (wrongIds.length > 0) {
+    const btn = document.getElementById('retryBtn');
+    btn.style.display = 'inline-flex';
+    btn.textContent = `🔄 重练 ${wrongIds.length} 道错题`;
+  }
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+loadReport();
+</script>
+</body>
+</html>
