@@ -119,6 +119,9 @@
           <button onclick="generateUsageGuide()" class="btn btn-primary btn-block" id="usageGuideBtn">
             📖 生成使用说明
           </button>
+          <button onclick="expandUsageGuide()" class="btn btn-secondary btn-block" id="usageGuideExpandBtn" style="display:none;">
+            📖 展开使用说明
+          </button>
           <div class="divider" id="usageGuideDivider" style="display:none;"></div>
           <div id="usageGuideResult" style="display:none;">
             <div class="section-title">📖 使用说明</div>
@@ -170,6 +173,9 @@
           </div>
           <button onclick="askAssistant()" class="btn btn-primary btn-block" id="assistantBtn">
             🤖 生成准备指南
+          </button>
+          <button onclick="expandAssistant()" class="btn btn-secondary btn-block" id="assistantExpandBtn" style="display:none;">
+            📋 展开准备指南
           </button>
           <div class="divider"></div>
           <div id="assistantResult" style="display:none;">
