@@ -43,7 +43,7 @@ body {
 
 /* ===== Layout ===== */
 .container {
-  max-width: 1040px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 32px 20px;
 }
@@ -84,7 +84,7 @@ body {
 /* ===== Two-Column Grid ===== */
 .main-grid {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr 480px;
   gap: 24px;
   align-items: start;
 }
@@ -784,6 +784,8 @@ select:focus, input:focus, textarea:focus { border-color: var(--primary); box-sh
   border: 1px solid var(--border);
   line-height: 1.8;
   font-size: 15px;
+  max-height: 700px;
+  overflow-y: auto;
 }
 
 .report-content h2 { font-size: 18px; margin: 24px 0 10px; color: var(--primary-light); }
