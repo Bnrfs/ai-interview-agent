@@ -796,6 +796,11 @@ function toggleAssistantPanel() {
     panel.style.display = 'block';
     btn.textContent = '−';
     loadAssistantHistory();
+    // 恢复已生成的内容
+    const content = document.getElementById('assistantContent');
+    if (content && content.innerHTML.trim()) {
+      document.getElementById('assistantResult').style.display = 'block';
+    }
   } else {
     panel.style.display = 'none';
     btn.textContent = '＋';
@@ -878,6 +883,7 @@ async function askAssistant() {
 
 function closeAssistantResult() {
   document.getElementById('assistantResult').style.display = 'none';
+  document.getElementById('assistantBtn').innerHTML = '🤖 生成准备指南';
 }
 
 function copyAssistantGuide() {
@@ -922,6 +928,13 @@ function toggleUsageGuidePanel() {
   if (panel.style.display === 'none') {
     panel.style.display = 'block';
     btn.textContent = '−';
+    // 恢复已生成的内容
+    const content = document.getElementById('usageGuideContent');
+    if (content && content.innerHTML.trim()) {
+      document.getElementById('usageGuideResult').style.display = 'block';
+      document.getElementById('usageGuideDivider').style.display = 'block';
+      document.getElementById('usageGuideBtn').innerHTML = '🔄 重新生成';
+    }
   } else {
     panel.style.display = 'none';
     btn.textContent = '＋';
