@@ -164,8 +164,8 @@ class InterviewAssistant:
         if focus_areas:
             context_parts.append(f"重点关注领域：{'、'.join(focus_areas)}")
 
-        # 尝试加载历史记录
-        history_record = self._load_history(session_id) if session_id else self._load_history()
+        # 尝试加载历史记录（仅当用户明确选择了某次记录时）
+        history_record = self._load_history(session_id) if session_id else None
 
         if history_record:
             history_context = self._format_history_context(history_record)
