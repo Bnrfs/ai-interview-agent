@@ -795,9 +795,35 @@ function toggleAssistantPanel() {
   if (panel.style.display === 'none') {
     panel.style.display = 'block';
     btn.textContent = '−';
+    loadAssistantHistory();
   } else {
     panel.style.display = 'none';
     btn.textContent = '＋';
+  }
+}
+
+async function loadAssistantHistory() {
+  const select = document.getElementById('assistantHistorySelect');
+  const group = document.getElementById('assistantHistoryGroup');
+  select.innerHTML = '<option value="">不使用历史记录</option>';
+  try {
+    const resp = await fetch('/api/records');
+    const data = await resp.json();
+    if (data.records && data.records.length > 0) {
+      group.style.display = 'block';
+      data.records.forEach(r => {
+        const d = new Date(r.start_time * 1000);
+        const time = d.toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const found = _allScenesData.find(s => s.id === r.scene);
+        const sceneName = found ? found.name : r.scene;
+        const score = r.total_score ? Math.round(r.total_score) : '--';
+        select.innerHTML += `<option value="${r.session_id}">${sceneName} · ${r.question_count}题 · ${score}分 · ${time}</option>`;
+      });
+    } else {
+      group.style.display = 'none';
+    }
+  } catch (_) {
+    group.style.display = 'none';
   }
 }
 
@@ -814,21 +840,14 @@ async function askAssistant() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> 生成中...';
 
-  // 自动获取最近一次面试的 session_id
-  let latestSessionId = '';
-  try {
-    const recordsResp = await fetch('/api/records');
-    const recordsData = await recordsResp.json();
-    if (recordsData.records && recordsData.records.length > 0) {
-      latestSessionId = recordsData.records[0].session_id;
-    }
-  } catch (_) { /* 无历史记录，不传 session_id */ }
+  // 使用用户选择的历史记录
+  const selectedSessionId = document.getElementById('assistantHistorySelect').value;
 
   try {
     const resp = await fetch('/api/assistant/prepare-guide', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ position, background, level, focus_areas: focusAreas, session_id: latestSessionId }),
+      body: JSON.stringify({ position, background, level, focus_areas: focusAreas, session_id: selectedSessionId }),
     });
     if (!resp.ok) {
       let errMsg = '未知错误';
