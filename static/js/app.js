@@ -800,7 +800,6 @@ function toggleAssistantPanel() {
     const content = document.getElementById('assistantContent');
     if (content && content.innerHTML.trim()) {
       document.getElementById('assistantResult').style.display = 'block';
-      document.getElementById('assistantBtn').style.display = 'none';
       document.getElementById('assistantExpandBtn').style.display = 'none';
     }
   } else {
@@ -874,7 +873,6 @@ async function askAssistant() {
     const html = markdownToHtml(data.guide);
     document.getElementById('assistantContent').innerHTML = html;
     document.getElementById('assistantResult').style.display = 'block';
-    document.getElementById('assistantBtn').style.display = 'none';
     document.getElementById('assistantExpandBtn').style.display = 'none';
     btn.disabled = false;
     btn.innerHTML = '🔄 重新生成';
@@ -887,13 +885,11 @@ async function askAssistant() {
 
 function closeAssistantResult() {
   document.getElementById('assistantResult').style.display = 'none';
-  document.getElementById('assistantBtn').style.display = 'none';
   document.getElementById('assistantExpandBtn').style.display = 'block';
 }
 
 function expandAssistant() {
   document.getElementById('assistantResult').style.display = 'block';
-  document.getElementById('assistantBtn').style.display = 'none';
   document.getElementById('assistantExpandBtn').style.display = 'none';
 }
 
