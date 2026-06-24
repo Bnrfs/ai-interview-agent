@@ -35,7 +35,11 @@ class CustomSceneManager:
     # ============ 场景 CRUD ============
 
     def list_scenes(self) -> list[dict]:
-        return copy.deepcopy(self._scenes)
+        scenes = copy.deepcopy(self._scenes)
+        # 动态计算题目数，防止存储字段过时
+        for s in scenes:
+            s["question_count"] = len([q for q in self._questions if q.get("scene") == s["id"]])
+        return scenes
 
     def get_scene(self, scene_id: str) -> dict | None:
         for s in self._scenes:
@@ -105,7 +109,12 @@ class CustomSceneManager:
     def add_question(self, scene_id: str, question: str, category: str = "",
                      difficulty: int = 3, keywords: list[str] = None,
                      model_answer: str = "") -> dict | None:
-        scene = self.get_scene(scene_id)
+        # 直接在 self._scenes 中查找，避免深拷贝导致计数更新丢失
+        scene = None
+        for s in self._scenes:
+            if s["id"] == scene_id:
+                scene = s
+                break
         if not scene:
             return None
 
@@ -121,7 +130,7 @@ class CustomSceneManager:
         }
         self._questions.append(q)
 
-        # 更新场景题目计数
+        # 更新场景题目计数（直接修改原对象）
         scene["question_count"] = len([x for x in self._questions if x.get("scene") == scene_id])
         self._save_questions()
         self._save_scenes()
